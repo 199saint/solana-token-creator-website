@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Listado de Memecoins</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .token {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 15px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Memecoins recientes</h1>
+  <div id="tokens"></div>
+
+  <script>
+    const API_KEY = "TU_API_KEY_DE_BIRDEYE"; // crea una gratis en https://birdeye.so
+
+    async function cargarTokens() {
+      try {
+        // pedimos a la API de Birdeye los tokens nuevos
+        const res = await fetch("https://public-api.birdeye.so/defi/tokenlist?sort_by=created_at&sort_type=desc&offset=0&limit=50", {
+          headers: {
+            "accept": "application/json",
+            "x-api-key": API_KEY
+          }
+        });
+        const data = await res.json();
+        const ahora = Date.now() / 1000; // timestamp en segundos
+        const contenedor = document.getElementById("tokens");
+        contenedor.innerHTML = "";
+
+        data.data.items.forEach(token => {
+          const creadoHaceSeg = ahora - token.created_at;
+          const creadoHaceHoras = creadoHaceSeg / 3600;
+
+          // marketcap en USD (Birdeye devuelve USD, no EUR; aproximación: 1 USD ≈ 0.9 €)
+          const marketcapEur = token.mc * 0.9;
+
+          if (creadoHaceHoras <= 1 && marketcapEur > 10000 && marketcapEur < 50000) {
